@@ -19,11 +19,13 @@ final class PushCoordinatorTests: XCTestCase {
             store: store, httpClient: client,
             today: Date(timeIntervalSince1970: 1_757_500_000), timeZone: .utc
         )
-        XCTAssertEqual(result.outcomes.count, 1)
-        XCTAssertEqual(result.outcomes[0].stream, .dailyMetric)
-        XCTAssertEqual(result.outcomes[0].sent, 1)
-        XCTAssertEqual(result.outcomes[0].accepted, 1)
-        XCTAssertNil(result.outcomes[0].failure)
+        XCTAssertEqual(result.outcomes.count, 3, "the receiver declared all three streams this package implements")
+        XCTAssertTrue(result.outcomes.allSatisfy { $0.failure == nil })
+        guard let dailyMetric = result.outcomes.first(where: { $0.stream == .dailyMetric }) else {
+            return XCTFail("missing dailyMetric outcome")
+        }
+        XCTAssertEqual(dailyMetric.sent, 1)
+        XCTAssertEqual(dailyMetric.accepted, 1)
     }
 
     func testVersionMismatchProducesTheHttpClientFailureAndReadsNoHealthData() async throws {
