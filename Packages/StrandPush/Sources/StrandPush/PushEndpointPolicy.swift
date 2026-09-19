@@ -198,7 +198,7 @@ public enum PushEndpointPolicy {
 
     /// The allow list. VALUE FOR VALUE with the Kotlin `isLocalAddress` — do not add
     /// `100.64.0.0/10` (Tailscale CGNAT) here; that is the one deliberate omission.
-    static func isLocalAddress(_ literal: Literal) -> Bool {
+    private static func isLocalAddress(_ literal: Literal) -> Bool {
         switch literal {
         case .v4(let b):
             if b[0] == 127 { return true } // loopback
