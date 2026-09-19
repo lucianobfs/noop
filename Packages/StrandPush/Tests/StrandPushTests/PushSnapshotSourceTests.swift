@@ -6,7 +6,7 @@ import XCTest
 final class PushSnapshotSourceTests: XCTestCase {
     func testDailyMetricWindowIncludesTheBoundaryDayAndExcludesOutsideDays() async throws {
         let store = try await WhoopStore.inMemory()
-        try store.registryWriter.write { db in
+        try await store.registryWriter.write { db in
             for day in ["2026-08-31", "2026-09-01", "2026-09-14", "2026-09-15"] {
                 try db.execute(sql: "INSERT INTO dailyMetric (deviceId, day) VALUES (?, ?)", arguments: ["device-1", day])
             }
@@ -24,7 +24,7 @@ final class PushSnapshotSourceTests: XCTestCase {
     func testSleepSessionWindowIsHalfOpenOnStartTs() async throws {
         let store = try await WhoopStore.inMemory()
         let window = try PushWindow.days(from: "2026-09-01", to: "2026-09-14", timeZone: .utc)
-        try store.registryWriter.write { db in
+        try await store.registryWriter.write { db in
             for startTs in [window.startTsInclusive - 1, window.startTsInclusive, window.endTsExclusive - 1, window.endTsExclusive] {
                 try db.execute(
                     sql: "INSERT INTO sleepSession (deviceId, startTs, endTs, userEdited) VALUES (?, ?, ?, 0)",
@@ -44,7 +44,7 @@ final class PushSnapshotSourceTests: XCTestCase {
     func testWorkoutRoutePolylineIsAlwaysNullOnTheWire() async throws {
         let store = try await WhoopStore.inMemory()
         let window = try PushWindow.days(from: "2026-09-01", to: "2026-09-14", timeZone: .utc)
-        try store.registryWriter.write { db in
+        try await store.registryWriter.write { db in
             try db.execute(
                 sql: "INSERT INTO workout (deviceId, startTs, endTs, sport, source) VALUES (?, ?, ?, ?, ?)",
                 arguments: ["device-1", window.startTsInclusive, window.startTsInclusive + 100, "running", "apple"]
@@ -59,7 +59,7 @@ final class PushSnapshotSourceTests: XCTestCase {
     func testDeviceIdFiltersOtherDevicesOut() async throws {
         let store = try await WhoopStore.inMemory()
         let window = try PushWindow.days(from: "2026-09-01", to: "2026-09-14", timeZone: .utc)
-        try store.registryWriter.write { db in
+        try await store.registryWriter.write { db in
             try db.execute(sql: "INSERT INTO dailyMetric (deviceId, day) VALUES (?, ?)", arguments: ["device-1", "2026-09-05"])
             try db.execute(sql: "INSERT INTO dailyMetric (deviceId, day) VALUES (?, ?)", arguments: ["device-2", "2026-09-05"])
         }

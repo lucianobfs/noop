@@ -10,7 +10,7 @@ final class PushCoordinatorTests: XCTestCase {
 
     func testSuccessfulNegotiationSendsAndAcceptsEachDeclaredStream() async throws {
         let store = try await WhoopStore.inMemory()
-        try store.registryWriter.write { db in
+        try await store.registryWriter.write { db in
             try db.execute(sql: "INSERT INTO dailyMetric (deviceId, day) VALUES (?, ?)", arguments: ["device-1", "2026-09-05"])
         }
         let client = ScriptedHTTPClient()
@@ -66,7 +66,7 @@ final class PushCoordinatorTests: XCTestCase {
 
     func testMismatchedAckFailsTheStreamWithoutCrashing() async throws {
         let store = try await WhoopStore.inMemory()
-        try store.registryWriter.write { db in
+        try await store.registryWriter.write { db in
             try db.execute(sql: "INSERT INTO dailyMetric (deviceId, day) VALUES (?, ?)", arguments: ["device-1", "2026-09-05"])
         }
         let capabilitiesBody = Array("""
