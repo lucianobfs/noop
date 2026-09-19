@@ -7,6 +7,8 @@ import XCTest
 final class PushCoordinatorTests: XCTestCase {
     let endpoint = PushEndpointPolicy.ValidEndpoint(url: "http://127.0.0.1:9999/push", host: "127.0.0.1")
     let receiverStateId = "6f1b8f0a-3c2d-4e5f-9a1b-2c3d4e5f6a7b"
+    // 2026-09-14, so the default 14-day window (ending on `today`) is 2026-09-01...2026-09-14.
+    let today = Date(timeIntervalSince1970: 1_789_344_000)
 
     func testSuccessfulNegotiationSendsAndAcceptsEachDeclaredStream() async throws {
         let store = try await WhoopStore.inMemory()
@@ -17,7 +19,7 @@ final class PushCoordinatorTests: XCTestCase {
         let result = await PushCoordinator.push(
             endpoint: endpoint, token: "t", deviceId: "device-1", sourceId: "5b1c9e0a-df9a-4a6b-8f7e-8f2b6a2e9c11",
             store: store, httpClient: client,
-            today: Date(timeIntervalSince1970: 1_757_500_000), timeZone: .utc
+            today: today, timeZone: .utc
         )
         XCTAssertEqual(result.outcomes.count, 3, "the receiver declared all three streams this package implements")
         XCTAssertTrue(result.outcomes.allSatisfy { $0.failure == nil })
@@ -84,7 +86,7 @@ final class PushCoordinatorTests: XCTestCase {
         let result = await PushCoordinator.push(
             endpoint: endpoint, token: "t", deviceId: "device-1", sourceId: "5b1c9e0a-df9a-4a6b-8f7e-8f2b6a2e9c11",
             store: store, httpClient: client,
-            today: Date(timeIntervalSince1970: 1_757_500_000), timeZone: .utc
+            today: today, timeZone: .utc
         )
         XCTAssertEqual(result.outcomes[0].failure?.code, .ackInvalid)
         XCTAssertEqual(result.outcomes[0].accepted, 0)
